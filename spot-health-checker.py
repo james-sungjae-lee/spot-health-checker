@@ -5,7 +5,7 @@ import boto3
 import pickle
 import datetime
 import argparse
-import pandas as pd
+from pathlib import Path
 
 
 ### Spot Checker Mapping Data
@@ -109,7 +109,8 @@ while True:
             
     if current_time > stop_time:
         print("Stop Loop Logging")
-        if request_status == 'fulfilled':
+        print(f"Stop After Status: {request_status}")
+        if (request_status == 'fulfilled') or (request_status == 'request-canceled-and-instance-running'):
             print("Terminate Spot Instance")
             terminate_response = ec2.terminate_instances(InstanceIds=[instance_id])
             spot_data_dict['terminate_response'] = terminate_response
@@ -122,7 +123,8 @@ while True:
         break
     time.sleep(5)
     
+    
 spot_data_dict['logs'] = log_list
 filename = f"logs/{instance_type}_{region}_{az_id}_{launch_time}.pkl"
-os.makedirs('./logs', exist_ok=False)
+Path('./logs').mkdir(exist_ok=True)
 pickle.dump(spot_data_dict, open(filename, 'wb'))
