@@ -5,3 +5,4 @@ aws --version
 pip --version
 
 pip install -r requirements.txt
+pip install --upgrade awscli
