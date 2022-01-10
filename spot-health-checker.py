@@ -80,7 +80,7 @@ instance_tag = False
 current_time = datetime.datetime.now()
 current_time = current_time.astimezone(pytz.UTC)
 request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
-request_status = describe['SpotInstanceRequests'][0]['Status']['Code']
+request_status = request_describe['SpotInstanceRequests'][0]['Status']['Code']
 instance_describe = ''
 timestamps.append(current_time)
 request_describes.append(request_describe)
@@ -92,7 +92,7 @@ while True:
     current_time = datetime.datetime.now()
     current_time = current_time.astimezone(pytz.UTC)
     request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
-    request_status = describe['SpotInstanceRequests'][0]['Status']['Code']
+    request_status = request_describe['SpotInstanceRequests'][0]['Status']['Code']
     log_list.append((current_time, request_describe, instance_describe))
     
     if request_status == 'fulfilled':
