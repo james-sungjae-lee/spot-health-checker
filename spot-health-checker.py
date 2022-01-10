@@ -18,23 +18,23 @@ parser = argparse.ArgumentParser(description='Spot Checker Workload Information'
 parser.add_argument('--instance_type', type=str, default='t2.large')
 parser.add_argument('--region', type=str, default='ap-southeast-2')
 parser.add_argument('--az_id', type=str, default='apse2-az2')
-parser.add_argument('--wait', type=str, default='1', help='wait before request, minutes')
-parser.add_argument('--time_minutes', type=str, default='5', help='how long check spot instance, hours')
+parser.add_argument('--wait_minutes', type=str, default='1', help='wait before request, minutes')
+parser.add_argument('--time_minutes', type=str, default='5', help='how long check spot instance, minutes')
 parser.add_argument('--time_hours', type=str, default='0', help='how long check spot instance, hours')
 args = parser.parse_args()
 
 
 ### Spot Checker Arguments Parsing
-instance_type = args['instance_type']
+instance_type = args.instance_type
 instance_family = instance_type.split('.')[0]
 instance_arch = 'arm' if (instance_family in arm64_family) else 'x86'
-region = args['region']
-az_id = args['az_id']
+region = args.region
+az_id = args.az_id
 az_name = az_map_dict[(region, az_id)]
 ami_id = region_ami[instance_arch][region][0]
-launch_time = datetime.datetime.now() + datetime.timedelta(minutes=args['wait'])
+launch_time = datetime.datetime.now() + datetime.timedelta(minutes=args.wait_minutes)
 launch_time = launch_time.astimezone(pytz.UTC)
-stop_time = datetime.datetime.now() + datetime.timedelta(hours=args['time'], minutes=(args['time'] + args['wait']))
+stop_time = datetime.datetime.now() + datetime.timedelta(hours=args.time_hours, minutes=(args.time_minutes + args.wait_minutes))
 stop_time = stop_time.astimezone(pytz.UTC)
 spot_data_dict = {}
 
@@ -124,5 +124,5 @@ while True:
     time.sleep(5)
     
 spot_data_dict['logs'] = log_list
-filename = f"{instance_type}_{region}_{az_id}_{launch_time}"
+filename = f"logs/{instance_type}_{region}_{az_id}_{launch_time}"
 pickle.dump(spot_data_dict, open(filename, 'wb'))
