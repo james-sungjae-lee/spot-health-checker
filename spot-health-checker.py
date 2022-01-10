@@ -109,10 +109,9 @@ while True:
             instance_tag = False
             
     if current_time > stop_time:
-        print("Stop Loop Logging")
-        print(f"Stop After Status: {request_status}")
+        print(f"{instance_type}-{az_id}-{instance_id} stopped")
         if (request_status == 'fulfilled') or (request_status == 'request-canceled-and-instance-running'):
-            print("Terminate Spot Instance")
+            print(f"{instance_type}-{az_id}-{instance_id} terminated")
             terminate_response = ec2.terminate_instances(InstanceIds=[instance_id])
             spot_data_dict['terminate_response'] = terminate_response
             
