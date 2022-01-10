@@ -18,9 +18,9 @@ parser = argparse.ArgumentParser(description='Spot Checker Workload Information'
 parser.add_argument('--instance_type', type=str, default='t2.large')
 parser.add_argument('--region', type=str, default='ap-southeast-2')
 parser.add_argument('--az_id', type=str, default='apse2-az2')
-parser.add_argument('--wait_minutes', type=str, default='1', help='wait before request, minutes')
-parser.add_argument('--time_minutes', type=str, default='5', help='how long check spot instance, minutes')
-parser.add_argument('--time_hours', type=str, default='0', help='how long check spot instance, hours')
+parser.add_argument('--wait_minutes', type=int, default='1', help='wait before request, minutes')
+parser.add_argument('--time_minutes', type=int, default='5', help='how long check spot instance, minutes')
+parser.add_argument('--time_hours', type=int, default='0', help='how long check spot instance, hours')
 args = parser.parse_args()
 
 
