@@ -6,3 +6,5 @@ pip --version
 
 pip install -r requirements.txt
 pip install --upgrade awscli
+
+chmod +x run_workloads_parallel.sh
