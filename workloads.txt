@@ -1,2 +1,0 @@
-t2.large ap-southeast-2 apse2-az2
-t3.large ap-southeast-2 apse2-az2
