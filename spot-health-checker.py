@@ -99,13 +99,14 @@ while True:
         if instance_tag == False:
             instance_tag = True
             ec2.create_tags(Resources=[instance_id], Tags=[{'Key':'Name', 'Value':'spot-checker-target'}])
+            print(f"{instance_type}-{az_id}-{instance_id} fulfilled")
         
         instance_describe = ec2.describe_instance_status(InstanceIds=[instance_id])
         instance_status = instance_describe['InstanceStatuses']
-        print("Fulfilled")
         
     if request_status == 'capacity-not-available':
-        print("Capacity Not Available")
+        if instance_tag == True:
+            instance_tag = False
             
     if current_time > stop_time:
         print("Stop Loop Logging")
