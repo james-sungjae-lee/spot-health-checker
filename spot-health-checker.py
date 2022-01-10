@@ -84,6 +84,7 @@ current_time = current_time.astimezone(pytz.UTC)
 request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
 request_status = request_describe['SpotInstanceRequests'][0]['Status']['Code']
 instance_describe = ''
+instance_id = 'checker'
 log_list.append((current_time, request_describe, instance_describe))
 
 
@@ -111,7 +112,14 @@ while True:
             
     if current_time > stop_time:
         print(f"{instance_type}-{az_id}-{instance_id} stopped")
-        if (request_status == 'fulfilled') or (request_status == 'request-canceled-and-instance-running'):
+        
+        if instance_id == 'checker':
+            current_time = datetime.datetime.now()
+            current_time = current_time.astimezone(pytz.UTC)
+            request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
+            log_list.append((current_time, request_describe, instance_describe))
+            
+        elif (request_status == 'fulfilled') or (request_status == 'request-canceled-and-instance-running'):
             print(f"{instance_type}-{az_id}-{instance_id} terminated")
             terminate_response = ec2.terminate_instances(InstanceIds=[instance_id])
             spot_data_dict['terminate_response'] = terminate_response
@@ -121,6 +129,9 @@ while True:
             request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
             instance_describe = ec2.describe_instance_status(InstanceIds=[instance_id])
             log_list.append((current_time, request_describe, instance_describe))
+            
+        else:
+            print(f"{instance_type}-{az_id}-{instance_id} error")
         break
     time.sleep(5)
     
