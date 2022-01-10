@@ -1,3 +1,4 @@
+import os
 import pytz
 import time
 import boto3
@@ -124,5 +125,6 @@ while True:
     time.sleep(5)
     
 spot_data_dict['logs'] = log_list
-filename = f"logs/{instance_type}_{region}_{az_id}_{launch_time}"
+filename = f"logs/{instance_type}_{region}_{az_id}_{launch_time}.pkl"
+os.makedirs('./logs', exist_ok=False)
 pickle.dump(spot_data_dict, open(filename, 'wb'))
