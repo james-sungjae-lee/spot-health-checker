@@ -58,6 +58,7 @@ spot_data_dict['end_time'] = stop_time
 ### Start Spot Checker
 session = boto3.session.Session(profile_name='default')
 ec2 = session.client('ec2', region_name=region)
+s3 = session.resource('s3')
 
 create_request_response = ec2.request_spot_instances(
     InstanceCount=1,
@@ -128,3 +129,8 @@ spot_data_dict['logs'] = log_list
 filename = f"logs/{instance_type}_{region}_{az_id}_{launch_time}.pkl"
 Path('./logs').mkdir(exist_ok=True)
 pickle.dump(spot_data_dict, open(filename, 'wb'))
+
+# Upload log to S3
+BUCKET_NAME = 'sungjae-spot-checker-data'
+s3_path = f'logs/{filename}'
+s3.Object(BUCKET_NAME, s3_path).put(Body=spot_data_dict)
