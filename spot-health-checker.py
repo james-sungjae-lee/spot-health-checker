@@ -55,7 +55,7 @@ spot_data_dict['end_time'] = stop_time
 
 
 ### Start Spot Checker
-session = boto3.session.Session(profile_name='sungjae')
+session = boto3.session.Session(profile_name='default')
 ec2 = session.client('ec2', region_name=region)
 
 create_request_response = ec2.request_spot_instances(
