@@ -144,5 +144,4 @@ pickle.dump(spot_data_dict, open(filename, 'wb'))
 # Upload log to S3
 spot_data_dict_obj = pickle.dumps(spot_data_dict)
 BUCKET_NAME = 'sungjae-spot-checker-data'
-s3_path = f'logs/{filename}'
-s3.Object(BUCKET_NAME, s3_path).put(Body=spot_data_dict_obj)
+s3.Object(BUCKET_NAME, filename).put(Body=spot_data_dict_obj)
