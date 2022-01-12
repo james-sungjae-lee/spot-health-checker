@@ -1,4 +1,3 @@
-import os
 import pytz
 import time
 import boto3
