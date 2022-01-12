@@ -77,6 +77,32 @@ log_list = []
 instance_tag = False
 
 
+### Log Parser
+def log_sampling(current_time, request_describe, instance_describe):
+    request_state = 'error'
+    request_status = 'error'
+    if 'SpotInstanceRequests' in request_describe:
+        if len(request_describe['SpotInstanceRequests']) == 1:
+            if 'State' in request_describe['SpotInstanceRequests'][0]:
+                request_state = request_describe['SpotInstanceRequests'][0]['State']
+            if 'Status' in request_describe['SpotInstanceRequests'][0]:
+                request_status = request_describe['SpotInstanceRequests'][0]['Status']
+    
+    instance_id = 'error'
+    instance_state = 'error'
+    instance_status = 'error'
+    if 'InstanceStatuses' in instance_describe:
+        if len(instance_describe['InstanceStatuses']) == 1:
+            if 'InstanceId' in instance_describe['InstanceStatuses'][0]:
+                instance_id = instance_describe['InstanceStatuses'][0]['InstanceId']
+            if 'InstanceState' in instance_describe['InstanceStatuses'][0]:
+                instance_state = instance_describe['InstanceStatuses'][0]['InstanceState']
+            if 'InstanceStatus' in instance_describe['InstanceStatuses'][0]:
+                instance_status = instance_describe['InstanceStatuses'][0]['InstanceStatus']
+    
+    return (current_time, request_state, request_status, instance_id, instance_state, instance_status)
+    
+    
 ### First Log
 current_time = datetime.datetime.now()
 current_time = current_time.astimezone(pytz.UTC)
@@ -84,7 +110,8 @@ request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[r
 request_status = request_describe['SpotInstanceRequests'][0]['Status']['Code']
 instance_describe = ''
 instance_id = 'checker'
-log_list.append((current_time, request_describe, instance_describe))
+sample_log = log_sampling(current_time, request_describe, instance_describe)
+log_list.append(sample_log)
 
 
 ### Loop Log
@@ -93,7 +120,8 @@ while True:
     current_time = current_time.astimezone(pytz.UTC)
     request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
     request_status = request_describe['SpotInstanceRequests'][0]['Status']['Code']
-    log_list.append((current_time, request_describe, instance_describe))
+    sample_log = log_sampling(current_time, request_describe, instance_describe)
+    log_list.append(sample_log)
     
     if request_status == 'fulfilled':
         instance_id = request_describe['SpotInstanceRequests'][0]['InstanceId']
@@ -116,7 +144,8 @@ while True:
             current_time = datetime.datetime.now()
             current_time = current_time.astimezone(pytz.UTC)
             request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
-            log_list.append((current_time, request_describe, instance_describe))
+            sample_log = log_sampling(current_time, request_describe, instance_describe)
+            log_list.append(sample_log)
             
         elif (request_status == 'fulfilled') or (request_status == 'request-canceled-and-instance-running'):
             print(f"{instance_type}-{az_id}-{instance_id} terminated")
@@ -127,7 +156,8 @@ while True:
             current_time = current_time.astimezone(pytz.UTC)
             request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
             instance_describe = ec2.describe_instance_status(InstanceIds=[instance_id])
-            log_list.append((current_time, request_describe, instance_describe))
+            sample_log = log_sampling(current_time, request_describe, instance_describe)
+            log_list.append(sample_log)
             
         else:
             print(f"{instance_type}-{az_id}-{instance_id} error")
