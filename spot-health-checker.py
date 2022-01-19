@@ -112,61 +112,66 @@ instance_describe = ''
 instance_id = 'checker'
 sample_log = log_sampling(current_time, request_describe, instance_describe)
 log_list.append(sample_log)
+error_or_not = 'normal'
 
+try:
+    ### Loop Log
+    while True:
+        current_time = datetime.datetime.now()
+        current_time = current_time.astimezone(pytz.UTC)
+        request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
+        request_status = request_describe['SpotInstanceRequests'][0]['Status']['Code']
+        sample_log = log_sampling(current_time, request_describe, instance_describe)
+        log_list.append(sample_log)
 
-### Loop Log
-while True:
-    current_time = datetime.datetime.now()
-    current_time = current_time.astimezone(pytz.UTC)
-    request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
-    request_status = request_describe['SpotInstanceRequests'][0]['Status']['Code']
-    sample_log = log_sampling(current_time, request_describe, instance_describe)
-    log_list.append(sample_log)
-    
-    if request_status == 'fulfilled':
-        instance_id = request_describe['SpotInstanceRequests'][0]['InstanceId']
-        if instance_tag == False:
-            instance_tag = True
-            ec2.create_tags(Resources=[instance_id], Tags=[{'Key':'Name', 'Value':'spot-checker-target'}])
-            print(f"{instance_type}-{az_id}-{instance_id} fulfilled")
-        
-        instance_describe = ec2.describe_instance_status(InstanceIds=[instance_id])
-        instance_status = instance_describe['InstanceStatuses']
-        
-    if request_status == 'capacity-not-available':
-        if instance_tag == True:
-            instance_tag = False
-            
-    if current_time > stop_time:
-        print(f"{instance_type}-{az_id}-{instance_id} stopped")
-        
-        if instance_id == 'checker':
-            current_time = datetime.datetime.now()
-            current_time = current_time.astimezone(pytz.UTC)
-            request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
-            sample_log = log_sampling(current_time, request_describe, instance_describe)
-            log_list.append(sample_log)
-            
-        elif (request_status == 'fulfilled') or (request_status == 'request-canceled-and-instance-running'):
-            print(f"{instance_type}-{az_id}-{instance_id} terminated")
-            terminate_response = ec2.terminate_instances(InstanceIds=[instance_id])
-            spot_data_dict['terminate_response'] = terminate_response
-            
-            current_time = datetime.datetime.now()
-            current_time = current_time.astimezone(pytz.UTC)
-            request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
+        if request_status == 'fulfilled':
+            instance_id = request_describe['SpotInstanceRequests'][0]['InstanceId']
+            if instance_tag == False:
+                instance_tag = True
+                ec2.create_tags(Resources=[instance_id], Tags=[{'Key':'Name', 'Value':'spot-checker-target'}])
+                print(f"{instance_type}-{az_id}-{instance_id} fulfilled")
+
             instance_describe = ec2.describe_instance_status(InstanceIds=[instance_id])
-            sample_log = log_sampling(current_time, request_describe, instance_describe)
-            log_list.append(sample_log)
-            
-        else:
-            print(f"{instance_type}-{az_id}-{instance_id} error")
-        break
-    time.sleep(5)
+            instance_status = instance_describe['InstanceStatuses']
+
+        if request_status == 'capacity-not-available':
+            if instance_tag == True:
+                instance_tag = False
+
+        if current_time > stop_time:
+            print(f"{instance_type}-{az_id}-{instance_id} stopped")
+
+            if instance_id == 'checker':
+                current_time = datetime.datetime.now()
+                current_time = current_time.astimezone(pytz.UTC)
+                request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
+                sample_log = log_sampling(current_time, request_describe, instance_describe)
+                log_list.append(sample_log)
+
+            elif (request_status == 'fulfilled') or (request_status == 'request-canceled-and-instance-running'):
+                print(f"{instance_type}-{az_id}-{instance_id} terminated")
+                terminate_response = ec2.terminate_instances(InstanceIds=[instance_id])
+                spot_data_dict['terminate_response'] = terminate_response
+
+                current_time = datetime.datetime.now()
+                current_time = current_time.astimezone(pytz.UTC)
+                request_describe = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[request_id])
+                instance_describe = ec2.describe_instance_status(InstanceIds=[instance_id])
+                sample_log = log_sampling(current_time, request_describe, instance_describe)
+                log_list.append(sample_log)
+
+            else:
+                print(f"{instance_type}-{az_id}-{instance_id} error")
+            break
+        time.sleep(5)
+except:
+    error_or_not = 'error'
+    current_time = datetime.datetime.now()
+    print(f"{instance_type}_{region}_{az_id}_{current_time} Error! Now save logs")
     
 # Save log to Local
 spot_data_dict['logs'] = log_list
-filename = f"logs/{instance_type}_{region}_{az_id}_{launch_time}.pkl"
+filename = f"logs/{instance_type}_{region}_{az_id}_{launch_time}_{error_or_not}.pkl"
 Path('./logs').mkdir(exist_ok=True)
 pickle.dump(spot_data_dict, open(filename, 'wb'))
 
