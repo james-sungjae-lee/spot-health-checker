@@ -1,0 +1,16 @@
+r5b.4xlarge us-east-2 use2-az3
+r5a.24xlarge ap-northeast-1 apne1-az4
+r5ad.16xlarge us-east-1 use1-az5
+m6gd.8xlarge eu-west-1 euw1-az3
+r5ad.24xlarge eu-west-3 euw3-az1
+c5.metal sa-east-1 sae1-az3
+x2gd.8xlarge us-east-1 use1-az6
+m6i.16xlarge ap-northeast-2 apne2-az1
+c6gd.metal ap-south-1 aps1-az1
+r6g.16xlarge eu-west-2 euw2-az1
+m5n.24xlarge eu-central-1 euc1-az1
+r5dn.16xlarge us-west-2 usw2-az1
+c5.metal sa-east-1 sae1-az2
+c5a.24xlarge ca-central-1 cac1-az2
+m5d.8xlarge eu-north-1 eun1-az2
+m5.16xlarge eu-north-1 eun1-az3
